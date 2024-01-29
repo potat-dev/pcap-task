@@ -4,7 +4,9 @@ set (CMAKE_CXX_STANDARD 17)
 
 project(pcap-logger)
 
-add_executable(pcap-logger src/main.cpp)
+add_executable(pcap-logger src/main.cpp src/types.cpp src/utils.cpp)
+
+target_include_directories(pcap-logger PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 include(FetchContent)
 
@@ -19,5 +21,6 @@ if(NOT pcapplusplus_POPULATED)
   FetchContent_Populate(pcapplusplus)
   add_subdirectory(${pcapplusplus_SOURCE_DIR} ${pcapplusplus_BINARY_DIR})
 endif()
+
 
 target_link_libraries(pcap-logger PRIVATE Common++ Packet++ Pcap++)
