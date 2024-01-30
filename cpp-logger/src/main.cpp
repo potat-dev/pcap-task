@@ -103,16 +103,29 @@ int main(int argc, char *argv[])
 	{
 		std::cout
 			<< std::right << std::setw(16) << i.first.src.host
-			<< ":"
+			<< " : "
 			<< std::left << std::setw(5) << i.first.src.port
 			<< " -> "
 			<< std::right << std::setw(16) << i.first.dst.host
-			<< ":"
+			<< " : "
 			<< std::left << std::setw(5) << i.first.dst.port
-			<< " - "
-			<< "Packets: " << i.second
+			<< " -- "
+			<< "Packets: "
+			<< std::right << std::setw(5) << i.second.count
+			<< ", Bytes: "
+			<< std::right << std::setw(9) << i.second.bytes
 			<< std::endl;
 	}
+
+	// save to file
+
+	if (!saveStatsAsCSV(stats, "/code/projects/pcap-task/test.csv"))
+	{
+		std::cout << "Can't save to the file" << std::endl;
+		exit(1);
+	}
+
+	std::cout << "Saved to the file" << std::endl;
 
 	return 0;
 }

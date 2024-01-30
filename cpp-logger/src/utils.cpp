@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+#include <fstream>
+
 // pcap utils
 
 void listPcapLiveDevices()
@@ -22,6 +24,33 @@ void listPcapLiveDevices()
 			<< std::endl;
 	}
 }
+
+bool saveStatsAsCSV(ConnectionStats &stats, std::string filename)
+{
+	std::ofstream file(filename);
+	if (!file.is_open())
+	{
+		return false; // Unable to open the file
+	}
+
+	// CSV header
+	file << "Source Host,Destination Host,Source Port,Destination Port,Count,Bytes\n";
+
+	for (const auto &entry : stats)
+	{
+		const Connection &conn = entry.first;
+		const Stats &stats = entry.second;
+
+		file << conn.src.host << "," << conn.dst.host << ","
+			 << conn.src.port << "," << conn.dst.port << ","
+			 << stats.count << "," << stats.bytes << "\n";
+	}
+
+	file.close();
+	return true;
+}
+
+// pcap utils
 
 std::string getProtocolTypeAsString(pcpp::ProtocolType protocolType)
 {
