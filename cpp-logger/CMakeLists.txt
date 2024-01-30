@@ -4,7 +4,8 @@ set (CMAKE_CXX_STANDARD 17)
 
 project(pcap-logger)
 
-add_executable(pcap-logger src/main.cpp src/types.cpp src/utils.cpp)
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+add_executable(pcap-logger ${SOURCES})
 
 target_include_directories(pcap-logger PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
