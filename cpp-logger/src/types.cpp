@@ -1,9 +1,24 @@
 #include "types.hpp"
 #include "utils.hpp"
 
+#include <sstream>
+
 bool Address::operator==(const Address &other) const
 {
     return (host == other.host && port == other.port);
+}
+
+std::string Address::toString() const
+{
+    std::ostringstream out;
+    out << host << ":" << port;
+    return out.str();
+}
+
+std::ostream &operator<<(std::ostream &os, const Address &address)
+{
+    os << address.toString();
+    return os;
 }
 
 bool Connection::operator==(const Connection &other) const
@@ -11,15 +26,29 @@ bool Connection::operator==(const Connection &other) const
     return (src == other.src && dst == other.dst);
 }
 
-std::ostream &operator<<(std::ostream &os, const Address &address)
+std::string Connection::toString() const
 {
-    os << address.host << ":" << address.port;
-    return os;
+    std::ostringstream out;
+    out << src << " => " << dst;
+    return out.str();
 }
 
 std::ostream &operator<<(std::ostream &os, const Connection &connection)
 {
-    os << connection.src << " => " << connection.dst;
+    os << connection.toString();
+    return os;
+}
+
+std::string Stats::toString() const
+{
+    std::ostringstream out;
+    out << "Count: " << count << ", Bytes: " << bytes;
+    return out.str();
+}
+
+std::ostream &operator<<(std::ostream &os, const Stats &stats)
+{
+    os << stats.toString();
     return os;
 }
 
