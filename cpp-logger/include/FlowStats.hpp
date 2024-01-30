@@ -14,6 +14,7 @@ class FlowStats {
    public:
     FlowStats();
 
-    void consumePacket(Flow &flow, uint64_t bytes);
     FlowStatsT asMap() const;
+    void consumePacket(Flow &flow, uint64_t bytes);
+    bool saveAsCSV(std::string filename);
 };

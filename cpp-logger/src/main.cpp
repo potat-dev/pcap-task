@@ -1,13 +1,8 @@
-#include <IPv4Layer.h>
 #include <Packet.h>
 #include <PcapFileDevice.h>
-#include <PcapLiveDeviceList.h>
-#include <TcpLayer.h>
-#include <UdpLayer.h>
+#include <PcapLiveDevice.h>
 
-#include <iomanip>
 #include <iostream>
-#include <unordered_map>
 
 #include "FlowStats.hpp"
 #include "PacketClassifier.hpp"
@@ -20,12 +15,14 @@ int main(int argc, char *argv[]) {
     }
     // open a pcap file for reading
     pcpp::PcapFileReaderDevice reader(argv[1]);
-    // pcpp::PcapFileReaderDevice reader("/code/projects/pcap-task/test.pcap");
 
     if (!reader.open()) {
         std::cerr << "Error opening the pcap file" << std::endl;
         return 1;
     }
+
+    // compose filters:
+    // IPv4 and (TCP or UDP)
 
     pcpp::ProtoFilter ipFilter(pcpp::IPv4);
     pcpp::ProtoFilter tcpFilter(pcpp::TCP);
@@ -70,11 +67,12 @@ int main(int argc, char *argv[]) {
     }
 
     // save to file
-    // if (!saveStatsAsCSV(stats, "/code/projects/pcap-task/test.csv")) {
-    //     std::cout << "Can't save to the file" << std::endl;
-    //     exit(1);
-    // }
-    // std::cout << "Saved to the file" << std::endl;
+    if (!stats.saveAsCSV("/code/projects/pcap-task/test.csv")) {
+        std::cout << "Can't save to the file" << std::endl;
+        exit(1);
+    }
+
+    std::cout << "Saved to the file" << std::endl;
 
     return 0;
 }

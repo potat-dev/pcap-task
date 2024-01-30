@@ -55,5 +55,7 @@ bin/*
 test/test_runner
 .vscode/
 
+## Data
+
 *.pcap
 *.csv
