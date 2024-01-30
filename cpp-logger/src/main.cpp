@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <unordered_map>
 
 #include <IPv4Layer.h>
@@ -13,14 +14,14 @@
 
 int main(int argc, char *argv[])
 {
-	if (argc < 2)
-	{
-		std::cout << "Usage: app <file.pcap>" << std::endl;
-		return 0;
-	}
+	// if (argc < 2)
+	// {
+	// 	std::cout << "Usage: app <file.pcap>" << std::endl;
+	// 	return 0;
+	// }
 	// open a pcap file for reading
-	pcpp::PcapFileReaderDevice reader(argv[1]);
-	// pcpp::PcapFileReaderDevice reader("/code/projects/pcap-task/test.pcap");
+	// pcpp::PcapFileReaderDevice reader(argv[1]);
+	pcpp::PcapFileReaderDevice reader("/code/projects/pcap-task/test.pcap");
 
 	if (!reader.open())
 	{
@@ -36,7 +37,7 @@ int main(int argc, char *argv[])
 	{
 		auto length = rawPacket.getRawDataLen();
 		// parse the raw packet into a parsed packet
-		pcpp::Packet parsedPacket(&rawPacket);
+		pcpp::Packet parsed(&rawPacket);
 
 		std::cout << "--------------------\n"
 				  << std::endl
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
 				  << std::endl;
 
 		// first let's go over the layers one by one and find out its type, its total length, its header length and its payload length
-		for (pcpp::Layer *curLayer = parsedPacket.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
+		for (pcpp::Layer *curLayer = parsed.getFirstLayer(); curLayer != NULL; curLayer = curLayer->getNextLayer())
 		{
 			std::cout
 				<< "Layer type: " << getProtocolTypeAsString(curLayer->getProtocol()) << "; "
@@ -55,21 +56,60 @@ int main(int argc, char *argv[])
 		}
 
 		// verify the packet is IPv4
-		if (parsedPacket.isPacketOfType(pcpp::IPv4))
+		if (parsed.isPacketOfType(pcpp::IPv4) && (parsed.isPacketOfType(pcpp::TCP) || parsed.isPacketOfType(pcpp::UDP)))
 		{
 			// extract source and dest IPs
-			pcpp::IPv4Address srcIP = parsedPacket.getLayerOfType<pcpp::IPv4Layer>()->getSrcIPv4Address();
-			pcpp::IPv4Address dstIP = parsedPacket.getLayerOfType<pcpp::IPv4Layer>()->getDstIPv4Address();
+			pcpp::IPv4Layer *ipLayer = parsed.getLayerOfType<pcpp::IPv4Layer>();
+			if (ipLayer == nullptr)
+			{
+				std::cout << "" << std::endl;
+				return 0;
+			}
+			pcpp::IPv4Address srcIP = ipLayer->getSrcIPv4Address();
+			pcpp::IPv4Address dstIP = ipLayer->getDstIPv4Address();
 
-			auto srcPort = parsedPacket.getLayerOfType<pcpp::TcpLayer>()->getSrcPort();
-			auto dstPort = parsedPacket.getLayerOfType<pcpp::TcpLayer>()->getDstPort();
+			// get port
+
+			uint16_t srcPort;
+			uint16_t dstPort;
+
+			if (parsed.isPacketOfType(pcpp::TCP))
+			{
+				pcpp::TcpLayer *tcpLayer = parsed.getLayerOfType<pcpp::TcpLayer>();
+				if (tcpLayer == nullptr)
+				{
+					std::cout << "layer not found" << std::endl;
+					return 0;
+				}
+				else
+				{
+					srcPort = tcpLayer->getSrcPort();
+					dstPort = tcpLayer->getDstPort();
+				}
+			}
+
+			if (parsed.isPacketOfType(pcpp::UDP))
+			{
+				pcpp::UdpLayer *udpLayer = parsed.getLayerOfType<pcpp::UdpLayer>();
+				if (udpLayer == nullptr)
+				{
+					std::cout << "layer not found" << std::endl;
+					return 0;
+				}
+				else
+				{
+					srcPort = udpLayer->getSrcPort();
+					dstPort = udpLayer->getDstPort();
+				}
+			}
 
 			// print source and dest IPs
 			std::cout
 				<< "Src IP is " << srcIP << ":" << srcPort << std::endl
 				<< "Dst IP is " << dstIP << ":" << dstPort << std::endl;
 
-			counts[{{srcIP.toString(), srcPort}, {dstIP.toString(), dstPort}}] += 1;
+			Connection conn = {{srcIP.toString(), srcPort}, {dstIP.toString(), dstPort}};
+			counts[conn] += 1;
 
 			std::cout
 				<< "\n-------- LOG ---------\n"
@@ -77,7 +117,7 @@ int main(int argc, char *argv[])
 
 			for (auto i : counts)
 			{
-				std::cout << i.first << " - " << i.second << std::endl;
+				std::cout << std::right << std::setw(42) << i.first << " - " << i.second << std::endl;
 			}
 		}
 	}
@@ -85,7 +125,7 @@ int main(int argc, char *argv[])
 	reader.close();
 
 	std::cout
-		<< "\n-------- LOG ---------\n"
+		<< "\n-------- FINAL LOG ---------\n"
 		<< std::endl;
 
 	for (auto i : counts)
