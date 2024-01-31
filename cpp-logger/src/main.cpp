@@ -2,19 +2,66 @@
 #include <PcapFileDevice.h>
 #include <PcapLiveDevice.h>
 
+#include <CLI/CLI.hpp>
 #include <iostream>
 
 #include "FlowStats.hpp"
 #include "PacketClassifier.hpp"
 #include "utils.hpp"
 
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        std::cout << "Usage: app <file.pcap>" << std::endl;
-        return 0;
-    }
+int main(int argc, char* argv[]) {
+    CLI::App app{"Packet classifier"};
+    app.require_subcommand(1);
+
+    // settings
+    std::string input, output;
+    bool listInterfaces = false;
+
+    // initialize subcommands
+    CLI::App* appFileMode = app.add_subcommand("file", "File mode");
+    CLI::App* appInterfaceMode = app.add_subcommand("interface", "Interface mode");
+
+    // requirements
+    appFileMode->require_option(1, 2);
+    appInterfaceMode->require_option(1, 2);
+
+    // file mode
+    CLI::Option* fileInputOption =
+        appFileMode->add_option("-i,--input", input, "Input .pcap file")->option_text("FILE");
+    CLI::Option* fileOutputOption =
+        appFileMode->add_option("-o,--output", output, "Output .csv file")->option_text("FILE");
+
+    // requirements
+    fileInputOption->needs(fileOutputOption);
+    fileOutputOption->needs(fileInputOption);
+
+    appFileMode->final_callback([]() { std::cout << "FILE MODE !!!" << std::endl; });
+
+    // interface mode
+    CLI::Option* interfaceInputOption =
+        appInterfaceMode->add_option("-i,--input", input, "Input interface")->option_text("FILE");
+    CLI::Option* interfaceOutputOption =
+        appInterfaceMode->add_option("-o,--output", output, "Output .csv file")
+            ->option_text("FILE");
+    CLI::Option* listiInterfacesOption =
+        appInterfaceMode->add_flag("-l,--list", listInterfaces, "List interfaces");
+
+    // requirements
+    interfaceInputOption->needs(interfaceOutputOption);
+    interfaceOutputOption->needs(interfaceInputOption);
+    listiInterfacesOption->excludes(interfaceInputOption);
+    listiInterfacesOption->excludes(interfaceOutputOption);
+
+    appInterfaceMode->final_callback([]() { std::cout << "INTERFACE MODE !!!" << std::endl; });
+
+    // actual parsing
+    CLI11_PARSE(app, argc, argv);
+
+    std::cout << "In: " << input << ", Out: " << output << std::endl;
+    std::cout << "--- parsing complete !!! ---" << std::endl;
+
     // open a pcap file for reading
-    pcpp::PcapFileReaderDevice reader(argv[1]);
+    pcpp::PcapFileReaderDevice reader(input);
 
     if (!reader.open()) {
         std::cerr << "Error opening the pcap file" << std::endl;
@@ -67,7 +114,7 @@ int main(int argc, char *argv[]) {
     }
 
     // save to file
-    if (!stats.saveAsCSV("/code/projects/pcap-task/test.csv")) {
+    if (!stats.saveAsCSV(output)) {
         std::cout << "Can't save to the file" << std::endl;
         exit(1);
     }

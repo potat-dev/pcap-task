@@ -11,6 +11,8 @@ target_include_directories(pcap-logger PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 include(FetchContent)
 
+# fetch and link Pcap++
+
 FetchContent_Declare(
   pcapplusplus
   GIT_REPOSITORY https://github.com/seladb/PcapPlusPlus.git
@@ -23,5 +25,17 @@ if(NOT pcapplusplus_POPULATED)
   add_subdirectory(${pcapplusplus_SOURCE_DIR} ${pcapplusplus_BINARY_DIR})
 endif()
 
-
 target_link_libraries(pcap-logger PRIVATE Common++ Packet++ Pcap++)
+
+# fetch and link CLI11
+
+FetchContent_Declare(
+    cli11_proj
+    QUIET
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+    GIT_TAG v2.3.2
+)
+
+FetchContent_MakeAvailable(cli11_proj)
+
+target_link_libraries(pcap-logger PRIVATE CLI11::CLI11)
