@@ -18,12 +18,8 @@ int main(int argc, char* argv[]) {
     bool listInterfaces = false;
 
     // initialize subcommands
-    CLI::App* appFileMode = app.add_subcommand("file", "File mode");
-    CLI::App* appInterfaceMode = app.add_subcommand("interface", "Interface mode");
-
-    // requirements
-    appFileMode->require_option(1, 2);
-    appInterfaceMode->require_option(1, 2);
+    CLI::App* appFileMode = app.add_subcommand("file", "File mode - read from .pcap file");
+    CLI::App* appLiveMode = app.add_subcommand("live", "Live mode - capture from interface");
 
     // file mode
     CLI::Option* fileInputOption =
@@ -38,21 +34,18 @@ int main(int argc, char* argv[]) {
     appFileMode->final_callback([]() { std::cout << "FILE MODE !!!" << std::endl; });
 
     // interface mode
-    CLI::Option* interfaceInputOption =
-        appInterfaceMode->add_option("-i,--input", input, "Input interface")->option_text("FILE");
-    CLI::Option* interfaceOutputOption =
-        appInterfaceMode->add_option("-o,--output", output, "Output .csv file")
-            ->option_text("FILE");
-    CLI::Option* listiInterfacesOption =
-        appInterfaceMode->add_flag("-l,--list", listInterfaces, "List interfaces");
+    CLI::Option* listInterfacesOption =
+        appLiveMode->add_flag("-l,--list", listInterfaces, "List available interfaces and exit");
+    CLI::Option* liveInputOption =
+        appLiveMode->add_option("-i,--input", input, "Input interface")->option_text("FILE");
+    CLI::Option* liveOutputOption =
+        appLiveMode->add_option("-o,--output", output, "Output .csv file")->option_text("FILE");
 
     // requirements
-    interfaceInputOption->needs(interfaceOutputOption);
-    interfaceOutputOption->needs(interfaceInputOption);
-    listiInterfacesOption->excludes(interfaceInputOption);
-    listiInterfacesOption->excludes(interfaceOutputOption);
+    liveInputOption->needs(liveOutputOption);
+    liveOutputOption->needs(liveInputOption);
 
-    appInterfaceMode->final_callback([]() { std::cout << "INTERFACE MODE !!!" << std::endl; });
+    appLiveMode->final_callback([]() { std::cout << "LIVE MODE !!!" << std::endl; });
 
     // actual parsing
     CLI11_PARSE(app, argc, argv);
@@ -114,7 +107,7 @@ int main(int argc, char* argv[]) {
     }
 
     // save to file
-    if (!stats.saveAsCSV(output)) {
+    if (!stats.saveToCSV(output)) {
         std::cout << "Can't save to the file" << std::endl;
         exit(1);
     }

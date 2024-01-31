@@ -8,7 +8,7 @@ FlowStatsT FlowStats::asMap() const { return _stats; }
 
 void FlowStats::consumePacket(Flow &flow, uint64_t bytes) { _stats[flow].increment(bytes); }
 
-bool FlowStats::saveAsCSV(std::string filename) {
+bool FlowStats::saveToCSV(std::string filename) {
     std::ofstream file(filename);
     if (!file.is_open()) {
         return false;  // unable to open the file

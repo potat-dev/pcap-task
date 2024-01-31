@@ -4,10 +4,10 @@
 
 class Flow {
    private:
-    std::string srcHost;
-    std::string dstHost;
-    uint16_t srcPort;
-    uint16_t dstPort;
+    std::string _srcHost;
+    std::string _dstHost;
+    uint16_t _srcPort;
+    uint16_t _dstPort;
 
    public:
     Flow(std::string srcHost, std::string dstHost, uint16_t srcPort, uint16_t dstPort);
