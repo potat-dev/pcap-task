@@ -9,5 +9,7 @@ class PcapFileReader : public AbstractReader {
 
    public:
     PcapFileReader(std::string filename);
+
     void read() override;
+    inline void close() { _reader->close(); }
 };

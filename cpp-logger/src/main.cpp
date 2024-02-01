@@ -5,9 +5,7 @@
 #include <CLI/CLI.hpp>
 #include <iostream>
 
-#include "CustomProtoFilter.hpp"
-#include "FlowStats.hpp"
-#include "PacketClassifier.hpp"
+#include "PcapFileReader.hpp"
 
 int main(int argc, char* argv[]) {
     CLI::App app{"Packet classifier"};
@@ -50,55 +48,48 @@ int main(int argc, char* argv[]) {
     // actual parsing
     CLI11_PARSE(app, argc, argv);
 
-    std::cout << "In: " << input << ", Out: " << output << std::endl;
-    std::cout << "--- parsing complete !!! ---" << std::endl;
+    // std::cout << "In: " << input << ", Out: " << output << std::endl;
+    // std::cout << "--- parsing complete !!! ---" << std::endl;
 
-    // open a pcap file for reading
-    pcpp::PcapFileReaderDevice reader(input);
+    if (!listInterfaces && (input.empty() || output.empty())) {
+        std::cerr << "You need to specify input and output" << std::endl;
+    }
 
-    if (!reader.open()) {
-        std::cerr << "Error opening the pcap file" << std::endl;
+    AbstractReader* reader;
+
+    try {
+        reader = new PcapFileReader(input);
+    } catch (std::exception e) {
+        std::cerr << "Unable to open reader:" << std::endl << e.what() << std::endl;
         return 1;
     }
 
-    // compose filters: IPv4 and (TCP or UDP)
+    reader->read();
+    reader->close();
 
-    auto protoFilter = CustomProtoFilter::getFilter();
-    reader.setFilter(*protoFilter);
-
-    FlowStats stats;
-
-    pcpp::RawPacket rawPacket;
-
-    while (reader.getNextPacket(rawPacket)) {
-        int length = rawPacket.getRawDataLen();
-        // parse the raw packet into a parsed packet
-        pcpp::Packet parsed(&rawPacket);
-
-        // verify the packet is IPv4
-        if (parsed.isPacketOfType(pcpp::IPv4) &&
-            (parsed.isPacketOfType(pcpp::TCP) || parsed.isPacketOfType(pcpp::UDP))) {
-            Flow flow = PacketClassifier::extractFlow(parsed);
-            stats.consumePacket(flow, length);
-        }
+    try {
+        reader->saveToCSV(output);
+    } catch (std::exception e) {
+        std::cerr << "Unable to save CSV:" << std::endl << e.what() << std::endl;
+        return 1;
     }
 
-    reader.close();
+    // reader->saveToCSV(output);
 
-    std::cout << "\n-------- FINAL LOG ---------\n" << std::endl;
+    // std::cout << "\n-------- FINAL LOG ---------\n" << std::endl;
 
-    for (auto i : stats.asMap()) {
-        std::cout << i.first.getSrcHost() << " : " << i.first.getSrcPort() << " -> "
-                  << i.first.getDstHost() << " : " << i.first.getDstPort() << " -- "
-                  << "Packets: " << i.second.getPackets() << " Bytes: " << i.second.getBytes()
-                  << std::endl;
-    }
+    // for (auto i : stats.asMap()) {
+    //     std::cout << i.first.getSrcHost() << " : " << i.first.getSrcPort() << " -> "
+    //               << i.first.getDstHost() << " : " << i.first.getDstPort() << " -- "
+    //               << "Packets: " << i.second.getPackets() << " Bytes: " << i.second.getBytes()
+    //               << std::endl;
+    // }
 
-    // save to file
-    if (!stats.saveToCSV(output)) {
-        std::cout << "Can't save to the file" << std::endl;
-        exit(1);
-    }
+    // // save to file
+    // if (!stats.saveToCSV(output)) {
+    //     std::cout << "Can't save to the file" << std::endl;
+    //     exit(1);
+    // }
 
     std::cout << "Saved to the file" << std::endl;
 

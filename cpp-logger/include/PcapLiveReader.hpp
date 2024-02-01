@@ -9,7 +9,9 @@ class PcapLiveReader : public AbstractReader {
 
    public:
     PcapLiveReader(std::string interface);
+
     void read() override;
+    inline void close() { _device->close(); }
 
     static void listPcapLiveDevices();
 };
