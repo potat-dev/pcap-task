@@ -1,10 +1,14 @@
 #include "PcapLiveReader.hpp"
 
-PcapLiveReader::PcapFileReader(std::string interface) {
+#include <iostream>
+
+PcapLiveReader::PcapLiveReader(std::string interface) {
     _device = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName(interface);
-    if (dev == NULL) {
-        std::cerr << "Cannot find interface with IPv4 address of '" << interfaceIPAddr << "'"
-                  << std::endl;
-        return 1;
+
+    // verify that a device reader was indeed created
+    if (_device == NULL) {
+        throw std::invalid_argument("Cannot find provided interface");
     }
 }
+
+void PcapLiveReader::read() {}
