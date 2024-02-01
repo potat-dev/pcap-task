@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "py-stats-processor"
+version = "0.1.0"
+description = "Process pcap stats data, return stats for IP addresses"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^2.2.0"
+pyarrow = "^15.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
