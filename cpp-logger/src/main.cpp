@@ -5,9 +5,9 @@
 #include <CLI/CLI.hpp>
 #include <iostream>
 
+#include "CustomProtoFilter.hpp"
 #include "FlowStats.hpp"
 #include "PacketClassifier.hpp"
-#include "utils.hpp"
 
 int main(int argc, char* argv[]) {
     CLI::App app{"Packet classifier"};
@@ -61,29 +61,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // compose filters:
-    // IPv4 and (TCP or UDP)
+    // compose filters: IPv4 and (TCP or UDP)
 
-    pcpp::ProtoFilter ipFilter(pcpp::IPv4);
-    pcpp::ProtoFilter tcpFilter(pcpp::TCP);
-    pcpp::ProtoFilter udpFilter(pcpp::UDP);
-
-    pcpp::OrFilter transportFilter;
-    transportFilter.addFilter(&tcpFilter);
-    transportFilter.addFilter(&udpFilter);
-
-    pcpp::AndFilter protoFilter;
-    protoFilter.addFilter(&ipFilter);
-    protoFilter.addFilter(&transportFilter);
-
-    reader.setFilter(protoFilter);
+    auto protoFilter = CustomProtoFilter::getFilter();
+    reader.setFilter(*protoFilter);
 
     FlowStats stats;
 
     pcpp::RawPacket rawPacket;
 
     while (reader.getNextPacket(rawPacket)) {
-        auto length = rawPacket.getRawDataLen();
+        int length = rawPacket.getRawDataLen();
         // parse the raw packet into a parsed packet
         pcpp::Packet parsed(&rawPacket);
 

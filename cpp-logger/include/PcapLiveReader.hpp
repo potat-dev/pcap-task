@@ -8,6 +8,8 @@ class PcapLiveReader : public AbstractReader {
     pcpp::PcapLiveDevice* _device;
 
    public:
-    PcapLiveReader(std::string filename);
+    PcapLiveReader(std::string interface);
     void read() override;
+
+    static void listPcapLiveDevices();
 };
