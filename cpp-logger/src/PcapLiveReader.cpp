@@ -15,21 +15,23 @@ PcapLiveReader::PcapLiveReader(std::string interface) {
     _device = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName(interface);
 
     // verify that a device reader was indeed created
-    if (_device == NULL) {
+    if (_device == nullptr) {
         throw std::invalid_argument("Cannot find provided interface");
     }
+}
 
+PcapLiveReader& PcapLiveReader::getInstance(std::string interface) {
+    static PcapLiveReader instance(interface);
+    return instance;
+}
+
+void PcapLiveReader::init() {
     if (!_device->open()) {
         throw std::runtime_error("Cannot open reader for this device");
     }
 
     auto protoFilter = CustomProtoFilter::getFilter();
     _device->setFilter(*protoFilter);
-}
-
-PcapLiveReader& PcapLiveReader::getInstance(std::string interface) {
-    static PcapLiveReader instance(interface);
-    return instance;
 }
 
 void PcapLiveReader::packetHandler(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDevice* dev,

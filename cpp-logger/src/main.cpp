@@ -59,16 +59,26 @@ int main(int argc, char* argv[]) {
 
     // packet reader mode
     AbstractReader* reader;
+
     try {
         // CLI11 ensures that one of these modes has been selected
         if (app.got_subcommand(appFileMode)) reader = &PcapFileReader::getInstance(input);
         if (app.got_subcommand(appLiveMode)) reader = &PcapLiveReader::getInstance(input);
+
+        // open and initialize reader
+        reader->init();
     } catch (std::exception e) {
         std::cerr << "Unable to open reader:" << std::endl << e.what() << std::endl;
         exit(1);
     }
 
-    reader->read();
+    try {
+        reader->read();
+    } catch (std::exception e) {
+        std::cerr << "Unable to read packets:" << std::endl << e.what() << std::endl;
+        exit(1);
+    }
+
     reader->close();
 
     try {
@@ -77,15 +87,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "Unable to save CSV:" << std::endl << e.what() << std::endl;
         exit(1);
     }
-
-    // std::cout << "\n-------- FINAL LOG ---------\n" << std::endl;
-
-    // for (auto i : stats.asMap()) {
-    //     std::cout << i.first.getSrcHost() << " : " << i.first.getSrcPort() << " -> "
-    //               << i.first.getDstHost() << " : " << i.first.getDstPort() << " -- "
-    //               << "Packets: " << i.second.getPackets() << " Bytes: " << i.second.getBytes()
-    //               << std::endl;
-    // }
 
     std::cout << "Saved to the file" << std::endl;
 

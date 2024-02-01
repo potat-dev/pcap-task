@@ -14,6 +14,7 @@ class PcapFileReader : public AbstractReader {
    public:
     static PcapFileReader& getInstance(std::string filename);
 
+    void init() override;
     void read() override;
-    inline void close() { _reader->close(); }
+    inline void close() override { _reader->close(); }
 };

@@ -11,21 +11,23 @@ PcapFileReader::PcapFileReader(std::string filename) {
     _reader = pcpp::IFileReaderDevice::getReader(filename);
 
     // verify that a reader interface was indeed created
-    if (_reader == NULL) {
+    if (_reader == nullptr) {
         throw std::invalid_argument("Cannot determine reader for file type");
     }
+}
 
+PcapFileReader& PcapFileReader::getInstance(std::string filename) {
+    static PcapFileReader instance(filename);
+    return instance;
+}
+
+void PcapFileReader::init() {
     if (!_reader->open()) {
         throw std::runtime_error("Cannot open reader for this file");
     }
 
     auto protoFilter = CustomProtoFilter::getFilter();
     _reader->setFilter(*protoFilter);
-}
-
-PcapFileReader& PcapFileReader::getInstance(std::string filename) {
-    static PcapFileReader instance(filename);
-    return instance;
 }
 
 void PcapFileReader::read() {
