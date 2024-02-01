@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "py-stats-processor"
-version = "0.1.0"
+version = "1.0.0"
 description = "Process pcap stats data, return stats for IP addresses"
-authors = ["Your Name <you@example.com>"]
+authors = ["Denis Churilov <me@potat.dev>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
