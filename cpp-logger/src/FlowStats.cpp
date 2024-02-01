@@ -6,7 +6,7 @@ FlowStats::FlowStats() {}
 
 FlowStatsT FlowStats::asMap() const { return _stats; }
 
-void FlowStats::consumePacket(Flow &flow, uint64_t bytes) { _stats[flow].increment(bytes); }
+void FlowStats::consumePacket(Flow& flow, uint64_t bytes) { _stats[flow].increment(bytes); }
 
 bool FlowStats::saveToCSV(std::string filename) {
     std::ofstream file(filename);
@@ -17,9 +17,9 @@ bool FlowStats::saveToCSV(std::string filename) {
     // CSV header
     file << "Source Host,Destination Host,Source Port,Destination Port,Count,Bytes\n";
 
-    for (const auto &entry : _stats) {
-        const Flow &flow = entry.first;
-        const Stats &stats = entry.second;
+    for (const auto& entry : _stats) {
+        const Flow& flow = entry.first;
+        const Stats& stats = entry.second;
 
         file << flow.getSrcHost() << "," << flow.getDstHost() << "," << flow.getSrcPort() << ","
              << flow.getDstPort() << "," << stats.getPackets() << "," << stats.getBytes() << "\n";

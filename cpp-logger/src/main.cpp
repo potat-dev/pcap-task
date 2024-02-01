@@ -48,9 +48,6 @@ int main(int argc, char* argv[]) {
     // actual parsing
     CLI11_PARSE(app, argc, argv);
 
-    // std::cout << "In: " << input << ", Out: " << output << std::endl;
-    // std::cout << "--- parsing complete !!! ---" << std::endl;
-
     if (!listInterfaces && (input.empty() || output.empty())) {
         std::cerr << "You need to specify input and output" << std::endl;
     }
@@ -58,7 +55,7 @@ int main(int argc, char* argv[]) {
     AbstractReader* reader;
 
     try {
-        reader = new PcapFileReader(input);
+        reader = &PcapFileReader::getInstance(input);
     } catch (std::exception e) {
         std::cerr << "Unable to open reader:" << std::endl << e.what() << std::endl;
         return 1;
@@ -83,12 +80,6 @@ int main(int argc, char* argv[]) {
     //               << i.first.getDstHost() << " : " << i.first.getDstPort() << " -- "
     //               << "Packets: " << i.second.getPackets() << " Bytes: " << i.second.getBytes()
     //               << std::endl;
-    // }
-
-    // // save to file
-    // if (!stats.saveToCSV(output)) {
-    //     std::cout << "Can't save to the file" << std::endl;
-    //     exit(1);
     // }
 
     std::cout << "Saved to the file" << std::endl;

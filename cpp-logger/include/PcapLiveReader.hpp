@@ -7,8 +7,12 @@ class PcapLiveReader : public AbstractReader {
    private:
     pcpp::PcapLiveDevice* _device;
 
-   public:
     PcapLiveReader(std::string interface);
+    PcapLiveReader(const PcapLiveReader&) = delete;
+    PcapLiveReader& operator=(const PcapLiveReader&) = delete;
+
+   public:
+    static PcapLiveReader& getInstance(std::string interface);
 
     void read() override;
     inline void close() { _device->close(); }
