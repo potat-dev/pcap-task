@@ -14,13 +14,12 @@ int main(int argc, char* argv[]) {
 
     // settings
     std::string input, output;
-    bool listInterfaces = false;
-
-    AbstractReader* reader;
 
     // initialize subcommands
     CLI::App* appFileMode = app.add_subcommand("file", "File mode - read from .pcap file");
     CLI::App* appLiveMode = app.add_subcommand("live", "Live mode - capture from interface");
+    CLI::App* appListInerfacesMode =
+        appLiveMode->add_subcommand("list", "List available interfaces and exit");
 
     // file mode
     CLI::Option* fileInputOption =
@@ -32,11 +31,7 @@ int main(int argc, char* argv[]) {
     fileInputOption->needs(fileOutputOption);
     fileOutputOption->needs(fileInputOption);
 
-    appFileMode->final_callback([]() { std::cout << "FILE MODE !!!" << std::endl; });
-
     // interface mode
-    CLI::Option* listInterfacesOption =
-        appLiveMode->add_flag("-l,--list", listInterfaces, "List available interfaces and exit");
     CLI::Option* liveInputOption =
         appLiveMode->add_option("-i,--input", input, "Input interface")->option_text("FILE");
     CLI::Option* liveOutputOption =
@@ -46,21 +41,31 @@ int main(int argc, char* argv[]) {
     liveInputOption->needs(liveOutputOption);
     liveOutputOption->needs(liveInputOption);
 
-    appLiveMode->final_callback([]() { std::cout << "LIVE MODE !!!" << std::endl; });
-
     // actual parsing
     CLI11_PARSE(app, argc, argv);
 
-    if (!listInterfaces && (input.empty() || output.empty())) {
-        std::cerr << "You need to specify input and output" << std::endl;
+    // list interfaces mode
+    if (appListInerfacesMode->parsed()) {
+        std::cout << "Available interfaces:\n" << std::endl;
+        PcapLiveReader::listPcapLiveDevices();
+        exit(0);
     }
 
+    // ensure i/o arguments are not empty
+    if (input.empty() || output.empty()) {
+        std::cerr << "You need to specify input and output" << std::endl;
+        exit(1);
+    }
+
+    // packet reader mode
+    AbstractReader* reader;
     try {
-        // reader = &PcapFileReader::getInstance(input);
-        reader = &PcapLiveReader::getInstance(input);
+        // CLI11 ensures that one of these modes has been selected
+        if (app.got_subcommand(appFileMode)) reader = &PcapFileReader::getInstance(input);
+        if (app.got_subcommand(appLiveMode)) reader = &PcapLiveReader::getInstance(input);
     } catch (std::exception e) {
         std::cerr << "Unable to open reader:" << std::endl << e.what() << std::endl;
-        return 1;
+        exit(1);
     }
 
     reader->read();
@@ -70,7 +75,7 @@ int main(int argc, char* argv[]) {
         reader->saveToCSV(output);
     } catch (std::exception e) {
         std::cerr << "Unable to save CSV:" << std::endl << e.what() << std::endl;
-        return 1;
+        exit(1);
     }
 
     // std::cout << "\n-------- FINAL LOG ---------\n" << std::endl;
