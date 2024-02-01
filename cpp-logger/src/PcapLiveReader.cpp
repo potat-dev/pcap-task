@@ -50,7 +50,7 @@ void PcapLiveReader::packetHandler(pcpp::RawPacket* rawPacket, pcpp::PcapLiveDev
 void PcapLiveReader::signalHandler(int sig) { _capturing = false; }
 
 void PcapLiveReader::read() {
-    std::cout << std::endl << "Starting async capture..." << std::endl;
+    std::cout << std::endl << "Starting packet capture... (press Ctrl+C to stop)" << std::endl;
 
     // start capture in async mode. Give a callback function to call to whenever a packet is
     // captured and the stats object as the cookie
@@ -72,6 +72,8 @@ void PcapLiveReader::read() {
 
     // stop capturing packets
     _device->stopCapture();
+
+    std::cout << std::endl << "Packet capture is finished" << std::endl;
 }
 
 void PcapLiveReader::listPcapLiveDevices() {

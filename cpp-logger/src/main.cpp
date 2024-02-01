@@ -67,14 +67,14 @@ int main(int argc, char* argv[]) {
 
         // open and initialize reader
         reader->init();
-    } catch (std::exception e) {
+    } catch (std::exception& e) {
         std::cerr << "Unable to open reader:" << std::endl << e.what() << std::endl;
         exit(1);
     }
 
     try {
         reader->read();
-    } catch (std::exception e) {
+    } catch (std::exception& e) {
         std::cerr << "Unable to read packets:" << std::endl << e.what() << std::endl;
         exit(1);
     }
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 
     try {
         reader->saveToCSV(output);
-    } catch (std::exception e) {
+    } catch (std::exception& e) {
         std::cerr << "Unable to save CSV:" << std::endl << e.what() << std::endl;
         exit(1);
     }
