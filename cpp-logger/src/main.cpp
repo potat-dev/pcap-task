@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "PcapFileReader.hpp"
+#include "PcapLiveReader.hpp"
 
 int main(int argc, char* argv[]) {
     CLI::App app{"Packet classifier"};
@@ -14,6 +15,8 @@ int main(int argc, char* argv[]) {
     // settings
     std::string input, output;
     bool listInterfaces = false;
+
+    AbstractReader* reader;
 
     // initialize subcommands
     CLI::App* appFileMode = app.add_subcommand("file", "File mode - read from .pcap file");
@@ -52,10 +55,9 @@ int main(int argc, char* argv[]) {
         std::cerr << "You need to specify input and output" << std::endl;
     }
 
-    AbstractReader* reader;
-
     try {
-        reader = &PcapFileReader::getInstance(input);
+        // reader = &PcapFileReader::getInstance(input);
+        reader = &PcapLiveReader::getInstance(input);
     } catch (std::exception e) {
         std::cerr << "Unable to open reader:" << std::endl << e.what() << std::endl;
         return 1;
@@ -70,8 +72,6 @@ int main(int argc, char* argv[]) {
         std::cerr << "Unable to save CSV:" << std::endl << e.what() << std::endl;
         return 1;
     }
-
-    // reader->saveToCSV(output);
 
     // std::cout << "\n-------- FINAL LOG ---------\n" << std::endl;
 

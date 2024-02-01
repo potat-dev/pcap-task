@@ -34,8 +34,8 @@ void PcapFileReader::read() {
     while (_reader->getNextPacket(rawPacket)) {
         int length = rawPacket.getRawDataLen();
 
-        pcpp::Packet parsed(&rawPacket);
-        Flow flow = PacketClassifier::extractFlow(parsed);
+        pcpp::Packet parsedPacket(&rawPacket);
+        Flow flow = PacketClassifier::extractFlow(parsedPacket);
 
         _stats.consumePacket(flow, length);
     }
