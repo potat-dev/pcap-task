@@ -10,11 +10,22 @@ RUN apt-get update --fix-missing
 # Install build-essential, cmake, libpcap-dev
 RUN apt-get install -y git build-essential cmake libpcap-dev
 
-# Install python3, python3-venv and pipx
-RUN apt-get install -y python3 python3-venv python3-pip
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install pipx
-RUN python3 -m pipx ensurepath
+# Install software-properties-common
+RUN apt-get install -y software-properties-common
+
+# Add deadsnakes PPA
+RUN add-apt-repository ppa:deadsnakes/ppa
+
+# Install python3.9 and python3.9-venv
+RUN apt-get install -y python3.9 python3.9-venv
+
+# Install pip for Python 3.9
+RUN apt-get install -y curl
+RUN curl https://bootstrap.pypa.io/get-pip.py | python3.9
+
+# Install pipx
+RUN python3.9 -m pip install pipx
+RUN python3.9 -m pipx ensurepath
 
 # Install poetry via pipx
 RUN pipx install poetry

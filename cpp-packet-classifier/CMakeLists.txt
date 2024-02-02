@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.14)
 
 set (CMAKE_CXX_STANDARD 17)
 
-project(cpp-packet-classifier)
+project(packet-classifier)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(cpp-packet-classifier ${SOURCES})
+add_executable(packet-classifier ${SOURCES})
 
-target_include_directories(cpp-packet-classifier PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(packet-classifier PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 include(FetchContent)
 
@@ -25,7 +25,7 @@ if(NOT pcapplusplus_POPULATED)
   add_subdirectory(${pcapplusplus_SOURCE_DIR} ${pcapplusplus_BINARY_DIR})
 endif()
 
-target_link_libraries(cpp-packet-classifier PRIVATE Common++ Packet++ Pcap++)
+target_link_libraries(packet-classifier PRIVATE Common++ Packet++ Pcap++)
 
 # fetch and link CLI11
 
@@ -38,4 +38,4 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(cli11_proj)
 
-target_link_libraries(cpp-packet-classifier PRIVATE CLI11::CLI11)
+target_link_libraries(packet-classifier PRIVATE CLI11::CLI11)
